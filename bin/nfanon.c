@@ -92,6 +92,14 @@ static void usage(char *name) {
 					, name);
 } /* usage */
 
+uint32_t replace_victim() {
+    return 0;
+}
+
+void replace_victim_v6(uint64_t *ip_arr) {
+	ip_arr[0] = ip_arr[1] = 0;
+}
+
 static inline void AnonRecord(master_record_t *master_record) {
 extension_map_t *extension_map = master_record->map_ref;
 int		i;
@@ -99,19 +107,19 @@ int		i;
 	// Required extension 1 - IP addresses
 	if ( (master_record->flags & FLAG_IPV6_ADDR) != 0 )	{ // IPv6
 		// IPv6
-		uint64_t    anon_ip[2];
-		anonymize_v6(master_record->V6.srcaddr, anon_ip);
-		master_record->V6.srcaddr[0] = anon_ip[0];
-		master_record->V6.srcaddr[1] = anon_ip[1];
+		uint64_t    ip_arr[2];
+		replace_victim_v6(ip_arr);
+		//master_record->V6.srcaddr[0] = ip_arr[0];
+		//master_record->V6.srcaddr[1] = ip_arr[1];
     
-		anonymize_v6(master_record->V6.dstaddr, anon_ip);
-		master_record->V6.dstaddr[0] = anon_ip[0];
-		master_record->V6.dstaddr[1] = anon_ip[1];
+		replace_victim_v6(ip_arr);
+		master_record->V6.dstaddr[0] = ip_arr[0];
+		master_record->V6.dstaddr[1] = ip_arr[1];
 
 	} else { 	
 		// IPv4
-		master_record->V4.srcaddr = anonymize(master_record->V4.srcaddr);
-		master_record->V4.dstaddr = anonymize(master_record->V4.dstaddr);
+		//master_record->V4.srcaddr = replace_victim();
+		master_record->V4.dstaddr = replace_victim();
 	}
 
 	// Process optional extensions
@@ -119,51 +127,51 @@ int		i;
 	while ( extension_map->ex_id[i] ) {
 		switch (extension_map->ex_id[i++]) {
 			case EX_AS_2: // srcas/dstas 2 byte
-				master_record->srcas = 0;
+				//master_record->srcas = 0;
 				master_record->dstas = 0;
 				break;
 			case EX_AS_4: // srcas/dstas 4 byte
-				master_record->srcas = 0;
+				//master_record->srcas = 0;
 				master_record->dstas = 0;
 				break;
 			case EX_NEXT_HOP_v4:
-				master_record->ip_nexthop.V4 = anonymize(master_record->ip_nexthop.V4);
+				master_record->ip_nexthop.V4 = replace_victim();
 				break;
 			case EX_NEXT_HOP_v6: {
-				uint64_t    anon_ip[2];
-				anonymize_v6(master_record->ip_nexthop.V6, anon_ip);
-				master_record->ip_nexthop.V6[0] = anon_ip[0];
-				master_record->ip_nexthop.V6[1] = anon_ip[1];
+				uint64_t    ip_arr[2];
+				replace_victim_v6(ip_arr);
+				master_record->ip_nexthop.V6[0] = ip_arr[0];
+				master_record->ip_nexthop.V6[1] = ip_arr[1];
 				} break;
 			case EX_NEXT_HOP_BGP_v4: 
-				master_record->bgp_nexthop.V4 = anonymize(master_record->bgp_nexthop.V4);
+				master_record->bgp_nexthop.V4 = replace_victim();
 				break;
 			case EX_NEXT_HOP_BGP_v6: {
-				uint64_t    anon_ip[2];
-				anonymize_v6(master_record->bgp_nexthop.V6, anon_ip);
-				master_record->bgp_nexthop.V6[0] = anon_ip[0];
-				master_record->bgp_nexthop.V6[1] = anon_ip[1];
+				uint64_t    ip_arr[2];
+				replace_victim_v6(ip_arr);
+				master_record->bgp_nexthop.V6[0] = ip_arr[0];
+				master_record->bgp_nexthop.V6[1] = ip_arr[1];
 				} break;
 			case EX_ROUTER_IP_v4:
-				master_record->ip_router.V4 = anonymize(master_record->ip_router.V4);
+				master_record->ip_router.V4 = replace_victim();
 				break;
 			case EX_ROUTER_IP_v6: {
-				uint64_t    anon_ip[2];
-				anonymize_v6(master_record->ip_router.V6, anon_ip);
-				master_record->ip_router.V6[0] = anon_ip[0];
-				master_record->ip_router.V6[1] = anon_ip[1];
+				uint64_t    ip_arr[2];
+				replace_victim_v6(ip_arr);
+				master_record->ip_router.V6[0] = ip_arr[0];
+				master_record->ip_router.V6[1] = ip_arr[1];
 				} break;
 #ifdef NSEL
 			case EX_NSEL_XLATE_IP_v4:
-				master_record->xlate_src_ip.V4 = anonymize(master_record->xlate_src_ip.V4);
-				master_record->xlate_dst_ip.V4 = anonymize(master_record->xlate_dst_ip.V4);
+				//master_record->xlate_src_ip.V4 = replace_victim();
+				master_record->xlate_dst_ip.V4 = replace_victim();
 				break;
 			case EX_NSEL_XLATE_IP_v6: {
 				uint64_t    anon_ip[2];
-				anonymize_v6(master_record->xlate_src_ip.V6, anon_ip);
-				master_record->xlate_src_ip.V6[0] = anon_ip[0];
-				master_record->xlate_src_ip.V6[1] = anon_ip[1];
-				anonymize_v6(master_record->xlate_dst_ip.V6, anon_ip);
+				replace_victim_v6(anon_ip);
+				//master_record->xlate_src_ip.V6[0] = anon_ip[0];
+				//master_record->xlate_src_ip.V6[1] = anon_ip[1];
+				replace_victim_v6(anon_ip);
 				master_record->xlate_dst_ip.V6[0] = anon_ip[0];
 				master_record->xlate_dst_ip.V6[1] = anon_ip[1];
 				} break;
