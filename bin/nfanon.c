@@ -92,10 +92,12 @@ static void usage(char *name) {
 					, name);
 } /* usage */
 
+// Removes victim's IP for DDoSDB, IPv4
 uint32_t replace_victim() {
     return 0;
 }
 
+// Removes victim's IP for DDoSDB, IPv6
 void replace_victim_v6(uint64_t *ip_arr) {
 	ip_arr[0] = ip_arr[1] = 0;
 }
