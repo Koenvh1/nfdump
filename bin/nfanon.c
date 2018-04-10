@@ -89,12 +89,14 @@ static void usage(char *name) {
 					"-M <expr>\tRead input from multiple directories.\n"
 					"-R <expr>\tRead input from sequence of files.\n"
 					"-w <file>\tName of output file. Defaults to input file.\n"
+					"-c <ip>\t IPv4 address in xxx.xxx.xxx.xxx format\n"
 					, name);
 } /* usage */
 
 // Removes victim's IP for DDoSDB, IPv4
+uint32_t creplace_ip = 0;
 uint32_t replace_victim() {
-    return 0;
+    return creplace_ip;
 }
 
 // Removes victim's IP for DDoSDB, IPv6
@@ -422,17 +424,16 @@ int	v1_map_done = 0;
 
 
 int main( int argc, char **argv ) {
-char 		*rfile, *Rfile, *wfile, *Mdirs;
+char 		*rfile, *Rfile, *wfile, *Mdirs, *ip;
 int			c;
 char		CryptoPAnKey[32];
 
-	rfile = Rfile = Mdirs = wfile = NULL;
-	while ((c = getopt(argc, argv, "K:L:r:M:R:w:")) != EOF) {
+	rfile = Rfile = Mdirs = wfile = ip = NULL;
+	while ((c = getopt(argc, argv, "K:L:r:M:R:w:c:")) != EOF) {
 		switch (c) {
 			case 'h':
 				usage(argv[0]);
 				exit(0);
-				break;
 				break;
 			case 'K':
 				if ( !ParseCryptoPAnKey(optarg, CryptoPAnKey) ) {
@@ -458,6 +459,19 @@ char		CryptoPAnKey[32];
 				break;
 			case 'w':
 				wfile = optarg;
+				break;
+			case 'c':
+				ip = optarg;
+				// This is 256 * 256 * 256 (2^8 * 3)
+				uint32_t multiplier = 16777216;
+				char *token = strtok(ip, ".");
+				while (token != NULL) {
+					creplace_ip = creplace_ip + (strtol(token, NULL, 10) * multiplier);
+					multiplier = multiplier / 256;
+
+					token = strtok(NULL, ".");
+				}
+				fprintf(stdout, ip);
 				break;
 			default:
 				usage(argv[0]);
